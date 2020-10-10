@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import ply.yacc as yacc
 from lex import tokens
 import sys
@@ -72,11 +73,11 @@ def p_disjunction(p):
 
 def p_error(p):
     if p:
-        print("Syntax error: line " + str(p.lineno) + ' col ' + str(p.lexpos) + '.')
-        exit(1)
+        print("Syntax error: line " + str(p.lineno) + ', col ' + str(p.lexpos) + '.')
+        return
     else:
         print('Syntax error: unexpected end of file.')
-        exit(1)
+        return
 
 
 def main(args):
@@ -84,7 +85,8 @@ def main(args):
     filename = args[0]
     with open(filename, 'r') as file:
         result = parser.parse(file.read())
-        sys.stdout = open(filename + '.out', 'w')
+        if len(args) == 1:
+            sys.stdout = open(filename + '.out', 'w')
         print(result)
 
 
