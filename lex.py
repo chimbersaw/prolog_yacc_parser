@@ -6,8 +6,8 @@ tokens = [
     'DOT',
     'SEMICOLON',
     'COMMA',
-    'LEFTBRACKET',
-    'RIGHTBRACKET',
+    'LBR',
+    'RBR',
     'SHTOPOR'
 ]
 
@@ -15,16 +15,15 @@ t_ID = r'[a-zA-Z_][a-zA-Z_0-9]*'
 t_DOT = '\.'
 t_SEMICOLON = ';'
 t_COMMA = ','
-t_LEFTBRACKET = '\('
-t_RIGHTBRACKET = '\)'
+t_LBR = '\('
+t_RBR = '\)'
 t_SHTOPOR = r':-'
 
 t_ignore = ' \t'
 
 
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    raise SyntaxError("Illegal character '%s'" % t.value[0])
 
 
 def t_newline(t):

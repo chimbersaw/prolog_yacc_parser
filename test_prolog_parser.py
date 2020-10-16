@@ -12,7 +12,7 @@ def test_integrate_correct_trivial(tmp_path, monkeypatch, capsys):
     prolog_parser.main(['input.mod', 'test'])
     out, err = capsys.readouterr()
     assert err == '' or err == 'Generating LALR tables\n'
-    assert out == 'relation\n	head\n		atom\n			identifier = f\n'
+    assert out == 'relation\n	head\n		identifier = f\n'
 
 
 def test_integrate_correct_spaces(tmp_path, monkeypatch, capsys):
@@ -23,11 +23,10 @@ def test_integrate_correct_spaces(tmp_path, monkeypatch, capsys):
     prolog_parser.main(['input.mod', 'test'])
     out, err = capsys.readouterr()
     assert err == ''
-    assert out == 'relation\n	head\n		atom\n			identifier = f\nrelation\n	head\n		atom\n			' \
-                  'identifier = f\n	body\n		atom\n			identifier = g\nrelation\n	head\n		atom\n		' \
-                  '	identifier = f\n	body\n		disjunction\n			conjunction\n				atom\n		' \
-                  '			identifier = g\n				atom\n					identifier = h\n			' \
-                  'atom\n				identifier = t\n'
+    assert out == 'relation\n	head\n		identifier = f\nrelation\n	head\n		identifier = f\n	body\n		' \
+                  'identifier = g\nrelation\n	head\n		identifier = f\n	body\n		disjunction\n			' \
+                  'conjunction\n				identifier = g\n				identifier = h\n			identifier ' \
+                  '= t\n'
 
 
 def test_integrate_correct_brackets(tmp_path, monkeypatch, capsys):
@@ -36,9 +35,30 @@ def test_integrate_correct_brackets(tmp_path, monkeypatch, capsys):
     prolog_parser.main(['input.mod', 'test'])
     out, err = capsys.readouterr()
     assert err == ''
-    assert out == 'relation\n	head\n		atom\n			identifier = f\n			atom\n				identifier ' \
-                  '= f\n	body\n		disjunction\n			atom\n				identifier = g\n			' \
-                  'atom\n				identifier = h\n'
+    assert out == 'relation\n	head\n		atom\n			identifier = f\n			atom\n				atom\n	' \
+                  '				identifier = f\n	body\n		disjunction\n			identifier = g\n			' \
+                  'identifier = h\n'
+
+
+def test_integrate_correct_atom(tmp_path, monkeypatch, capsys):
+    (tmp_path / 'input.mod').write_text('f :- g, (h; t).')
+    monkeypatch.chdir(tmp_path)
+    prolog_parser.main(['input.mod', 'test'])
+    out, err = capsys.readouterr()
+    assert err == ''
+    assert out == 'relation\n	head\n		identifier = f\n	body\n		conjunction\n			identifier = ' \
+                  'g\n			disjunction\n				identifier = h\n				identifier = t\n'
+
+
+def test_integrate_correct_atom_args(tmp_path, monkeypatch, capsys):
+    (tmp_path / 'input.mod').write_text('a b c.\na (b c).')
+    monkeypatch.chdir(tmp_path)
+    prolog_parser.main(['input.mod', 'test'])
+    out, err = capsys.readouterr()
+    assert err == ''
+    assert out == 'relation\n	head\n		atom\n			identifier = a\n			identifier = b\n			' \
+                  'identifier = c\nrelation\n	head\n		atom\n			identifier = a\n			atom\n		' \
+                  '		identifier = b\n				identifier = c\n'
 
 
 def test_integrate_correct_shtopor(tmp_path, monkeypatch, capsys):
@@ -47,7 +67,7 @@ def test_integrate_correct_shtopor(tmp_path, monkeypatch, capsys):
     prolog_parser.main(['input.mod', 'test'])
     out, err = capsys.readouterr()
     assert err == ''
-    assert out == 'relation\n	head\n		atom\n			identifier = f\n	body\n		atom\n			identifier = g\n'
+    assert out == 'relation\n	head\n		identifier = f\n	body\n		identifier = g\n'
 
 
 def test_integrate_correct_big(tmp_path, monkeypatch, capsys):
@@ -58,36 +78,41 @@ def test_integrate_correct_big(tmp_path, monkeypatch, capsys):
     prolog_parser.main(['input.mod', 'test'])
     out, err = capsys.readouterr()
     assert err == ''
-    assert out == 'relation\n	head\n		atom\n			identifier = f\n	body\n		atom\n			identifier ' \
-                  '= g\nrelation\n	head\n		atom\n			identifier = f\n	body\n		(\nrelation\n	' \
-                  'head\n		atom\n			identifier = f\n	body\n		conjunction\n			(\n			' \
-                  'atom\n				identifier = h\nrelation\n	head\n		atom\n			identifier = f\n	' \
-                  'body\n		disjunction\n			(\n			atom\n				identifier = h\nrelation\n	' \
-                  'head\n		atom\n			identifier = f\n	body\n		conjunction\n			atom\n		' \
-                  '		identifier = h\n			(\nrelation\n	head\n		atom\n			identifier = f\n	' \
-                  'body\n		disjunction\n			atom\n				identifier = h\n			(' \
-                  '\nrelation\n	head\n		atom\n			identifier = f\n	body\n		disjunction\n			' \
-                  'conjunction\n				atom\n					identifier = a\n				' \
-                  'conjunction\n					atom\n						identifier = b\n					' \
-                  'atom\n						identifier = c\n			disjunction\n				' \
-                  'conjunction\n					atom\n						identifier = d\n					' \
-                  'conjunction\n						atom\n							identifier = e\n			' \
-                  '			atom\n							identifier = f\n				disjunction\n			' \
-                  '		conjunction\n						atom\n							identifier = g\n		' \
-                  '				conjunction\n							atom\n								identifier ' \
-                  '= h\n							(\n					disjunction\n						atom\n	' \
-                  '						identifier = u\n						disjunction\n						' \
-                  '	conjunction\n								atom\n									identifier = ' \
-                  'a\n								conjunction\n									atom\n			' \
-                  '							identifier = a\n									atom\n				' \
-                  '						identifier = a\n							disjunction\n					' \
-                  '			atom\n									identifier = a\n								' \
-                  'conjunction\n									atom\n										' \
+    assert out == 'relation\n	head\n		identifier = f\n	body\n		identifier = g\nrelation\n	head\n		' \
+                  'identifier = f\n	body\n		conjunction\n			identifier = a\n			identifier = ' \
+                  'b\nrelation\n	head\n		identifier = f\n	body\n		conjunction\n			' \
+                  'disjunction\n				identifier = a\n				identifier = b\n			identifier ' \
+                  '= h\nrelation\n	head\n		identifier = f\n	body\n		disjunction\n			' \
+                  'conjunction\n				identifier = a\n				identifier = b\n			identifier ' \
+                  '= h\nrelation\n	head\n		identifier = f\n	body\n		conjunction\n			identifier = ' \
+                  'h\n			disjunction\n				identifier = a\n				identifier = ' \
+                  'b\nrelation\n	head\n		identifier = f\n	body\n		disjunction\n			identifier = ' \
+                  'h\n			conjunction\n				identifier = a\n				identifier = ' \
+                  'b\nrelation\n	head\n		identifier = f\n	body\n		disjunction\n			' \
+                  'conjunction\n				identifier = a\n				conjunction\n					' \
+                  'identifier = b\n					identifier = c\n			disjunction\n				' \
+                  'conjunction\n					identifier = d\n					conjunction\n				' \
+                  '		identifier = e\n						identifier = f\n				disjunction\n		' \
+                  '			conjunction\n						identifier = g\n						' \
+                  'conjunction\n							identifier = h\n							' \
+                  'conjunction\n								identifier = a\n								' \
+                  'disjunction\n									conjunction\n									' \
+                  '	identifier = a\n										identifier = a\n						' \
+                  '			conjunction\n										identifier = a\n					' \
+                  '					disjunction\n											disjunction\n			' \
+                  '									identifier = a\n												' \
+                  'identifier = b\n											identifier = a\n					' \
+                  'disjunction\n						identifier = u\n						disjunction\n		' \
+                  '					conjunction\n								identifier = a\n					' \
+                  '			conjunction\n									identifier = a\n						' \
+                  '			identifier = a\n							disjunction\n								' \
+                  'identifier = a\n								conjunction\n									' \
                   'identifier = a\n									conjunction\n									' \
-                  '	atom\n											identifier = a\n								' \
-                  '		conjunction\n											(\n									' \
-                  '		conjunction\n												(\n								' \
-                  '				atom\n													identifier = g\n'
+                  '	identifier = a\n										conjunction\n							' \
+                  '				identifier = a\n											conjunction\n			' \
+                  '									disjunction\n													' \
+                  'identifier = a\n													identifier = h\n				' \
+                  '								identifier = g\n'
 
 
 # Incorrect
@@ -126,6 +151,15 @@ def test_integrate_incorrect_eof3(tmp_path, monkeypatch, capsys):
     out, err = capsys.readouterr()
     assert err == ''
     assert out == 'Syntax error: unexpected end of file.\n'
+
+
+def test_integrate_incorrect_illegal_character(tmp_path, monkeypatch, capsys):
+    (tmp_path / 'input.mod').write_text('f : - f.')
+    monkeypatch.chdir(tmp_path)
+    prolog_parser.main(['input.mod'])
+    out, err = capsys.readouterr()
+    assert err == ''
+    assert re.match(r'Illegal character', out)
 
 
 def test_integrate_incorrect_no_right_operand(tmp_path, monkeypatch, capsys):
